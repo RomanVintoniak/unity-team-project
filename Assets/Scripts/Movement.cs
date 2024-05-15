@@ -7,6 +7,7 @@ public class Movement : MonoBehaviour
     public float walkspeed = 4;
     public float sprintSpeed = 5.5f;
     public float maxVelocityChange = 10f;
+    public float sneakingSpeed = 2f;
     [Space]
     public float airControl = 0.5f; 
 
@@ -19,6 +20,7 @@ public class Movement : MonoBehaviour
 
     private bool sprinting;
     private bool jumping;
+    private bool sneaking;
 
     private bool grounded = false;
 
@@ -35,6 +37,8 @@ public class Movement : MonoBehaviour
 
         sprinting = Input.GetButton("Sprint");
         jumping = Input.GetButton("Jump");
+        sneaking = Input.GetKey(KeyCode.LeftControl);
+
     }
 
     private void OnTriggerStay(Collider other)
@@ -52,7 +56,7 @@ public class Movement : MonoBehaviour
             }
             else if(input.magnitude > 0.5f)
             {
-                rb.AddForce(CalculationMovement(sprinting ? sprintSpeed : walkspeed), ForceMode.VelocityChange);
+                rb.AddForce(CalculationMovement(sprinting ? sprintSpeed : (sneaking ? sneakingSpeed : walkspeed)), ForceMode.VelocityChange);
             }
             else
             {
@@ -66,7 +70,7 @@ public class Movement : MonoBehaviour
         {
             if (input.magnitude > 0.5f)
             {
-                rb.AddForce(CalculationMovement(sprinting ? sprintSpeed * airControl : walkspeed * airControl), 
+                rb.AddForce(CalculationMovement(sprinting ? sprintSpeed * airControl : (sneaking ? sneakingSpeed     * airControl : walkspeed * airControl)),
                     ForceMode.VelocityChange);
             }
             else

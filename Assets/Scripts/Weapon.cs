@@ -20,6 +20,8 @@ public class Weapon : MonoBehaviour
 
     [Header("VFX")]
     public GameObject hitVFX;
+    public AudioSource gunfireSound;
+
 
     [Header("Ammo")]
     public int mags = 5;
@@ -65,7 +67,7 @@ public class Weapon : MonoBehaviour
     }
 
 
-    private void Start()
+    void Start()
     {
         magsText.text = mags.ToString();
         currentCountOfAmmoText.text = ammoInOneMag + "/" + currentCountOfAmmo;
@@ -76,10 +78,17 @@ public class Weapon : MonoBehaviour
 
         recoilLength = 0;
         recoverLenth = 1 / fireRate * recoverPersent;
+
+        gunfireSound = GetComponentInChildren<AudioSource>();
+        if (gunfireSound == null)
+        {
+            Debug.LogError("AudioSource not found! Make sure it's attached to the Weapon object or its children.");
+        }
     }
 
     void Update()
     {
+
         if (nextFire > 0)
         {
             nextFire -= Time.deltaTime;
@@ -120,12 +129,10 @@ public class Weapon : MonoBehaviour
 
     void Fire()
     {
-
         recoiling = true;
-        recovering  = false;
+        recovering = false;
 
         Ray ray = new Ray(camera.transform.position, camera.transform.forward);
-
         RaycastHit hit;
 
         PhotonNetwork.LocalPlayer.AddScore(1);
@@ -140,17 +147,16 @@ public class Weapon : MonoBehaviour
 
                 if (damage >= hit.transform.gameObject.GetComponent<Health>().health)
                 {
-                    //Kill
-
                     RoomManager.instance.kills++;
                     RoomManager.instance.SetHashes();
-
                     PhotonNetwork.LocalPlayer.AddScore(100);
                 }
-                
-                hit.transform.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBaffered, damage);
+
+                hit.transform.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, damage);
             }
         }
+
+        gunfireSound.Play();
     }
 
     public void Reload() {
@@ -207,5 +213,3 @@ public class Weapon : MonoBehaviour
     }
 
 }
-
-
